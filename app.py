@@ -20,6 +20,7 @@ from ui.data_upload import render_data_upload
 from ui.backtest_tab import render_backtest_config
 from ui.results_dashboard import render_results
 from ui.paper_trade_tab import render_paper_trade_tab
+from ui.research_panel import render_research_panel
 
 from core.data_engine.providers import HistoricalProvider
 from core.strategy_engine.base import get_strategy
@@ -68,6 +69,10 @@ def main():
                 data_warnings = report.warnings if report else []
                 render_results(result, data_warnings)
 
+                # Research panel (Phase 2)
+                cached_df = st.session_state.get("dataset")
+                render_research_panel(result, cached_df)
+
             else:
                 _render_welcome()
 
@@ -106,6 +111,9 @@ def _run_backtest(config: dict, df, report):
             st.session_state["backtest_result"] = result
             data_warnings = report.warnings if report else []
             render_results(result, data_warnings)
+
+            # Research panel (Phase 2)
+            render_research_panel(result, df)
 
         except Exception as e:
             st.error(f"Backtest failed: {str(e)}")
