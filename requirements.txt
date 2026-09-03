@@ -1,0 +1,21 @@
+# NIFTY Quant Lab - Phase 1
+# Core
+pandas>=2.2.0
+numpy>=1.26.0
+scipy>=1.12.0
+
+# Data
+pyarrow>=15.0.0
+pydantic>=2.6.0
+
+# UI
+streamlit>=1.40.0
+
+# Charts
+plotly>=5.18.0
+
+# Fuzzy matching for CSV column detection
+thefuzz[speedup]>=0.22.0
+
+# Testing
+pytest>=8.0.0
