@@ -166,6 +166,12 @@ def parse_csv(
         Tuple of (normalized DataFrame, DatasetReport)
     """
     # Load raw data
+    if hasattr(file, "seek"):
+        try:
+            file.seek(0)
+        except Exception:
+            pass
+
     if isinstance(file, pd.DataFrame):
         raw_df = file.copy()
     elif isinstance(file, str) and "\n" in file:
@@ -335,6 +341,17 @@ def parse_separate_ce_pe(
     This function handles that by parsing each, tagging option_type,
     and concatenating.
     """
+    if hasattr(ce_file, "seek"):
+        try:
+            ce_file.seek(0)
+        except Exception:
+            pass
+    if hasattr(pe_file, "seek"):
+        try:
+            pe_file.seek(0)
+        except Exception:
+            pass
+
     ce_df, ce_report = parse_csv(ce_file, underlying_name)
     pe_df, pe_report = parse_csv(pe_file, underlying_name)
 

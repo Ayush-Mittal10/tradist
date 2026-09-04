@@ -80,6 +80,9 @@ class BacktestEngine:
         completed_trades: list[Trade] = []
         equity_records: list[dict] = []
         warnings: list[str] = []
+        total_entry_signals = 0
+        fill_failures = 0
+        risk_rejections: dict[str, int] = {}
 
         trading_dates = self.data_provider.get_trading_dates(start_date, end_date)
 
@@ -151,6 +154,7 @@ class BacktestEngine:
             )
 
             if entry_signal is not None and entry_signal.action == "ENTER":
+                total_entry_signals += 1
                 expiry = market.get_nearest_expiry()
                 entry_fills = self.simulator.execute_signal(
                     entry_signal, market, expiry
@@ -168,6 +172,10 @@ class BacktestEngine:
                         )
                         open_positions.append(position)
                         risk_engine.open_position(entry_fills)
+                    else:
+                        risk_rejections[reason] = risk_rejections.get(reason, 0) + 1
+                else:
+                    fill_failures += 1
 
             # ── Record equity ───────────────────────────────────────
             # Mark-to-market open positions
@@ -227,9 +235,28 @@ class BacktestEngine:
                     completed_trades.append(trade)
                     risk_engine.close_position(position.legs, trade.net_pnl)
 
-            warnings.append(
-                f"{len(open_positions)} position(s) force-closed at end of backtest period"
-            )
+        # ── Diagnostics for empty trades or rejected entries ────────
+        if len(completed_trades) == 0:
+            if risk_rejections:
+                for reason, count in risk_rejections.items():
+                    warnings.append(
+                        f"0 trades executed: {count} entry attempt(s) blocked by Risk Engine ({reason}). "
+                        f"Short option positions require SPAN margin (~₹1.75L per naked leg, ~₹3.5L per straddle). "
+                        f"Try increasing initial capital or switching to a defined-risk spread."
+                    )
+            elif total_entry_signals == 0:
+                warnings.append(
+                    f"0 trades executed: '{self.strategy.name}' generated no entry signals in the selected date range. "
+                    f"Check strategy parameters or date range."
+                )
+            elif fill_failures > 0:
+                warnings.append(
+                    f"0 trades executed: {fill_failures} entry attempt(s) could not be filled "
+                    f"(missing option price data in chain for required strikes)."
+                )
+        elif risk_rejections:
+            for reason, count in risk_rejections.items():
+                warnings.append(f"{count} additional entry attempt(s) blocked by Risk Engine: {reason}")
 
         # ── Build equity curve DataFrame ────────────────────────────
         equity_curve = pd.DataFrame(equity_records)

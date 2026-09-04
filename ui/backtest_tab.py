@@ -84,7 +84,7 @@ def render_backtest_config(df: pd.DataFrame | None) -> dict | None:
     with col1:
         capital = st.number_input(
             "Initial Capital (₹)",
-            min_value=50_000,
+            min_value=10_000,
             max_value=1_00_00_000,
             value=5_00_000,
             step=50_000,
@@ -99,6 +99,29 @@ def render_backtest_config(df: pd.DataFrame | None) -> dict | None:
             step=1,
             help="Current NIFTY lot size is 65 (effective Jan 2026)",
         )
+
+    # ── Margin requirement advisory ─────────────────────────────────
+    is_naked_short = selected_name in ["Short ATM Straddle", "Short Strangle"]
+    is_spread = selected_name in ["Bull Call Spread", "Bear Call Spread"]
+    lots_requested = params.get("lots_per_trade", 1)
+
+    if is_naked_short:
+        legs_count = 2 if "Straddle" in selected_name or "Strangle" in selected_name else 1
+        est_margin = legs_count * 175_000 * lots_requested
+        if capital * 0.8 < est_margin:
+            st.warning(
+                f"⚠️ **Margin Advisory**: {selected_name} requires ~₹{est_margin:,.0f} SPAN margin "
+                f"for {lots_requested} lot(s). At ₹{capital:,.0f} capital, the Risk Engine will block entries. "
+                f"Increase capital to ≥ ₹{int(est_margin / 0.8):,.0f} or choose a defined-risk spread (e.g. Bull Call Spread)."
+            )
+        else:
+            st.caption(f"Estimated SPAN margin: ~₹{est_margin:,.0f} for {lots_requested} lot(s)")
+    elif is_spread:
+        est_margin = 50_000 * lots_requested
+        if capital * 0.8 < est_margin:
+            st.warning(f"⚠️ Spread requires ~₹{est_margin:,.0f} margin for {lots_requested} lot(s).")
+        else:
+            st.caption(f"Estimated spread margin: ~₹{est_margin:,.0f}")
 
     # ── Transaction costs ───────────────────────────────────────────
     st.markdown('<div class="section-header">💸 Transaction Costs</div>', unsafe_allow_html=True)

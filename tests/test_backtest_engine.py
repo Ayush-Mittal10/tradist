@@ -175,3 +175,20 @@ class TestBacktestEngine:
         assert abs(result.final_capital - expected) < 1.0, (
             f"Final={result.final_capital}, Expected={expected}"
         )
+
+    def test_insufficient_capital_generates_risk_warning(self, provider):
+        """When capital is too low to trade, warnings must explain margin requirement."""
+        strategy = get_strategy("Short ATM Straddle")
+        engine = BacktestEngine(
+            strategy=strategy,
+            data_provider=provider,
+            lot_size=65,
+        )
+        result = engine.run(
+            start_date=date(2025, 6, 1),
+            end_date=date(2025, 6, 30),
+            initial_capital=50_000,
+        )
+        assert len(result.trades) == 0
+        assert len(result.warnings) > 0
+        assert any("Risk Engine" in w and "margin" in w.lower() for w in result.warnings)

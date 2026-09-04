@@ -30,12 +30,42 @@ def render_results(result: BacktestResult, data_warnings: list[str] | None = Non
         result: BacktestResult from the backtest engine
         data_warnings: Warnings from data validation
     """
-    if not result.trades and not result.warnings:
-        st.info("No trades executed. Try adjusting your strategy parameters or date range.")
+    all_warnings = (data_warnings or []) + result.warnings
+
+    if not result.trades:
+        st.markdown(
+            '<div class="section-header">📊 Backtest Completed — 0 Trades Executed</div>',
+            unsafe_allow_html=True,
+        )
+        if all_warnings:
+            st.markdown("### ⚠️ Diagnostics & Warnings")
+            for warning in all_warnings:
+                st.markdown(
+                    f'<div class="warning-badge" style="margin-bottom: 0.75rem;">{warning}</div>',
+                    unsafe_allow_html=True,
+                )
+
+        st.markdown("""
+        <div style="
+            padding: 1.5rem;
+            background: var(--bg-card, #151525);
+            border: 1px solid var(--border, #2a2a3e);
+            border-radius: 10px;
+            margin-top: 1rem;
+            line-height: 1.7;
+        ">
+            <h4 style="color: var(--text-primary, #e8e8f0); margin-bottom: 0.5rem;">💡 Diagnostic Guidance</h4>
+            <ul style="color: var(--text-secondary, #8888aa); margin-left: 1rem; line-height: 1.8;">
+                <li><b>Margin Requirements:</b> Naked short strategies (Short Straddles & Strangles) require ~₹1.75L SPAN margin per leg (~₹3.5L per straddle lot). If your capital is below this, trades are blocked by the Risk Engine.</li>
+                <li><b>Capital Sizing:</b> For Short Straddles with 1 lot, set capital to <b>₹4,50,000+</b>.</li>
+                <li><b>Defined-Risk Alternatives:</b> For smaller capital (₹50,000–₹1,00,000), switch to <b>Bull Call Spread</b> or <b>Bear Call Spread</b>, which require only ~₹50,000 margin per lot.</li>
+                <li><b>Date Range:</b> Ensure your backtest start and end dates overlap with the timestamps in the uploaded dataset.</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
         return
 
     # Compute metrics
-    all_warnings = (data_warnings or []) + result.warnings
     metrics = compute_metrics(
         trades=result.trades,
         initial_capital=result.initial_capital,

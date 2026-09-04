@@ -43,8 +43,22 @@ def render_data_upload() -> tuple[pd.DataFrame | None, DatasetReport | None]:
             help="CSV with columns for date, strike, option type (CE/PE), and prices",
         )
         if uploaded is not None:
-            with st.spinner("Parsing and validating..."):
-                df, report = parse_csv(uploaded)
+            upload_id = f"comb_{uploaded.name}_{uploaded.size}"
+            if st.session_state.get("_last_upload_id") == upload_id and "dataset" in st.session_state:
+                df = st.session_state["dataset"]
+                report = st.session_state.get("dataset_report")
+            else:
+                with st.spinner("Parsing and validating..."):
+                    try:
+                        df, report = parse_csv(uploaded)
+                        if report.is_valid and df is not None:
+                            df = normalize(df)
+                            st.session_state["dataset"] = df
+                            st.session_state["dataset_report"] = report
+                            st.session_state["_last_upload_id"] = upload_id
+                    except Exception as e:
+                        st.error(f"Error parsing uploaded file: {e}")
+                        return None, None
 
     else:
         col1, col2 = st.columns(2)
@@ -61,21 +75,26 @@ def render_data_upload() -> tuple[pd.DataFrame | None, DatasetReport | None]:
                 key="pe_csv",
             )
         if ce_file is not None and pe_file is not None:
-            with st.spinner("Parsing and validating..."):
-                df, report = parse_separate_ce_pe(ce_file, pe_file)
+            upload_id = f"sep_{ce_file.name}_{ce_file.size}_{pe_file.name}_{pe_file.size}"
+            if st.session_state.get("_last_upload_id") == upload_id and "dataset" in st.session_state:
+                df = st.session_state["dataset"]
+                report = st.session_state.get("dataset_report")
+            else:
+                with st.spinner("Parsing and validating..."):
+                    try:
+                        df, report = parse_separate_ce_pe(ce_file, pe_file)
+                        if report.is_valid and df is not None:
+                            df = normalize(df)
+                            st.session_state["dataset"] = df
+                            st.session_state["dataset_report"] = report
+                            st.session_state["_last_upload_id"] = upload_id
+                    except Exception as e:
+                        st.error(f"Error parsing CE/PE files: {e}")
+                        return None, None
 
     # Show validation results
     if report is not None:
         _render_validation_report(report)
-
-        if report.is_valid and df is not None:
-            try:
-                df = normalize(df)
-                st.session_state["dataset"] = df
-                st.session_state["dataset_report"] = report
-            except ValueError as e:
-                st.error(f"Data normalization failed: {e}")
-                return None, None
 
     # Check session state for previously loaded data
     if df is None and "dataset" in st.session_state:

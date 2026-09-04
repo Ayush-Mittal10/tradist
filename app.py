@@ -54,13 +54,15 @@ def main():
         with results_col:
             # Check if we should run a backtest
             if st.session_state.get("run_backtest", False):
-                config = st.session_state["backtest_config"]
+                config = st.session_state.get("backtest_config")
                 df = st.session_state.get("dataset")
                 report = st.session_state.get("dataset_report")
+                st.session_state["run_backtest"] = False
 
-                if df is not None:
+                if df is not None and config is not None:
                     _run_backtest(config, df, report)
-                    st.session_state["run_backtest"] = False
+                else:
+                    st.error("⚠️ Dataset not found in session. Please upload your CSV file first.")
 
             elif "backtest_result" in st.session_state:
                 # Show previous results

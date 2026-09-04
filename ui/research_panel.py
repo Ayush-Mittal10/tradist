@@ -180,7 +180,7 @@ def _render_volatility_dashboard(df: pd.DataFrame, r: float):
             line=dict(color=COLORS["accent"], width=2),
         ))
         _apply_layout(fig, "Realized Volatility (20-Day)")
-        fig.update_yaxis(title_text="Volatility (%)", ticksuffix="%")
+        fig.update_yaxes(title_text="Volatility (%)", ticksuffix="%")
         st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     st.markdown("---")
@@ -307,8 +307,8 @@ def _render_monte_carlo_analysis(
     )
 
     _apply_layout(fig, f"Monte Carlo P&L Distribution ({mc.n_paths:,} paths, σ={sigma*100:.1f}%)")
-    fig.update_xaxis(title_text="P&L (₹)", tickformat=",")
-    fig.update_yaxis(title_text="Frequency")
+    fig.update_xaxes(title_text="P&L (₹)", tickformat=",")
+    fig.update_yaxes(title_text="Frequency")
     st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
 
     # Extra stats

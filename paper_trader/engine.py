@@ -186,6 +186,11 @@ class PaperTradeEngine:
                                 f"Premium: ₹{entry_cost:,.0f}"
                             ),
                         }
+                    else:
+                        result = {
+                            "action": "ERROR",
+                            "details": f"Trade rejected by Risk Engine: {reason}",
+                        }
 
             # ── Record equity snapshot ──────────────────────────────
             unrealized = self._order_book.mark_to_market(market)

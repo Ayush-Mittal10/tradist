@@ -90,8 +90,8 @@ def equity_curve(equity_df: pd.DataFrame, initial_capital: float) -> go.Figure:
     )
 
     _apply_layout(fig, "📈 Equity Curve")
-    fig.update_yaxis(title_text="Capital (₹)", tickformat=",")
-    fig.update_xaxis(title_text="Date")
+    fig.update_yaxes(title_text="Capital (₹)", tickformat=",")
+    fig.update_xaxes(title_text="Date")
 
     return fig
 
@@ -117,8 +117,8 @@ def drawdown_chart(equity_df: pd.DataFrame) -> go.Figure:
     ))
 
     _apply_layout(fig, "📉 Drawdown")
-    fig.update_yaxis(title_text="Drawdown (%)", ticksuffix="%")
-    fig.update_xaxis(title_text="Date")
+    fig.update_yaxes(title_text="Drawdown (%)", ticksuffix="%")
+    fig.update_xaxes(title_text="Date")
 
     return fig
 
@@ -157,8 +157,8 @@ def pnl_distribution(trades: list[Trade]) -> go.Figure:
     fig.add_vline(x=0, line_color=COLORS["text_dim"], line_width=1)
 
     _apply_layout(fig, "📊 P&L Distribution")
-    fig.update_xaxis(title_text="Trade P&L (₹)", tickformat=",")
-    fig.update_yaxis(title_text="Frequency")
+    fig.update_xaxes(title_text="Trade P&L (₹)", tickformat=",")
+    fig.update_yaxes(title_text="Frequency")
 
     return fig
 
@@ -268,7 +268,7 @@ def trade_scatter(trades: list[Trade]) -> go.Figure:
     fig.add_hline(y=0, line_color=COLORS["text_dim"], line_width=1)
 
     _apply_layout(fig, "🎯 Trade P&L Scatter")
-    fig.update_xaxis(title_text="Date")
-    fig.update_yaxis(title_text="Net P&L (₹)", tickformat=",")
+    fig.update_xaxes(title_text="Date")
+    fig.update_yaxes(title_text="Net P&L (₹)", tickformat=",")
 
     return fig
