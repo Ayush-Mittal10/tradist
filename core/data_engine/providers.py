@@ -2,8 +2,10 @@
 Market data provider abstraction.
 
 This is the seam between the strategy engine and the data source.
-In Phase 1, only HistoricalProvider is implemented. Phase 3 adds
-LiveProvider for paper trading — but strategies don't change.
+- HistoricalProvider: feeds CSV/Parquet data (Phase 1)
+- LiveDataProvider: feeds real-time Upstox data (Phase 3)
+
+Strategies don't know which provider they're running against.
 """
 
 from __future__ import annotations
@@ -113,4 +115,71 @@ class HistoricalProvider(MarketDataProvider):
             underlying_close=underlying_close,
             option_chain=day_data.reset_index(drop=True),
             previous_close=previous_close,
+        )
+
+
+class LiveDataProvider(MarketDataProvider):
+    """
+    Provides real-time MarketState from Upstox API.
+
+    Same interface as HistoricalProvider — strategies can't tell
+    the difference between historical and live data.
+    """
+
+    def __init__(self, upstox_client):
+        """
+        Args:
+            upstox_client: Authenticated UpstoxClient instance
+        """
+        from core.data_engine.upstox_client import UpstoxClient
+        self._client: UpstoxClient = upstox_client
+        self._previous_close: float | None = None
+        self._last_close: float | None = None
+
+    def get_trading_dates(self, start: date, end: date) -> list[date]:
+        """
+        Not meaningful for live data.
+        Returns today's date if within range.
+        """
+        today = date.today()
+        if start <= today <= end:
+            return [today]
+        return []
+
+    def get_market_state(self, timestamp: datetime | None = None) -> MarketState:
+        """
+        Fetch current live option chain and build MarketState.
+
+        The timestamp parameter is ignored for live data — we always
+        fetch the latest available state.
+        """
+        if timestamp is None:
+            timestamp = datetime.now()
+
+        # Rotate previous close
+        if self._last_close is not None:
+            self._previous_close = self._last_close
+
+        # Fetch live data
+        try:
+            underlying_close = self._client.get_nifty_ltp()
+            option_chain = self._client.get_option_chain("current_week")
+        except Exception:
+            # Return empty state on API failure
+            return MarketState(
+                timestamp=timestamp,
+                underlying="NIFTY",
+                underlying_close=self._last_close or 0.0,
+                option_chain=pd.DataFrame(),
+                previous_close=self._previous_close,
+            )
+
+        self._last_close = underlying_close
+
+        return MarketState(
+            timestamp=timestamp,
+            underlying="NIFTY",
+            underlying_close=underlying_close,
+            option_chain=option_chain,
+            previous_close=self._previous_close,
         )

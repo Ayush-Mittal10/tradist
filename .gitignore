@@ -18,3 +18,9 @@ data/*.csv
 
 # OS
 .DS_Store
+
+# Secrets
+.env
+
+# Paper trading sessions
+paper_sessions/

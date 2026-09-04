@@ -1,4 +1,4 @@
-# NIFTY Quant Lab - Phase 1
+# NIFTY Quant Lab
 # Core
 pandas>=2.2.0
 numpy>=1.26.0
@@ -16,6 +16,13 @@ plotly>=5.18.0
 
 # Fuzzy matching for CSV column detection
 thefuzz[speedup]>=0.22.0
+
+# Live data (Phase 3)
+upstox-python-sdk>=2.0.0
+python-dotenv>=1.0.0
+websockets>=12.0
+protobuf>=4.25.0
+requests>=2.31.0
 
 # Testing
 pytest>=8.0.0
