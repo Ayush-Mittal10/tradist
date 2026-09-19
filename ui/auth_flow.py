@@ -100,7 +100,7 @@ def _render_connect_form():
                 st.link_button(
                     "🚀 Login with Upstox",
                     auth_url,
-                    use_container_width=True,
+                    width="stretch",
                     type="primary",
                 )
                 st.caption(

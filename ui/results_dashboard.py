@@ -93,14 +93,14 @@ def render_results(result: BacktestResult, data_warnings: list[str] | None = Non
         st.markdown("<br>", unsafe_allow_html=True)
         st.plotly_chart(
             equity_curve(result.equity_curve, result.initial_capital),
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
         )
 
     if not result.equity_curve.empty:
         st.plotly_chart(
             drawdown_chart(result.equity_curve),
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
         )
 
@@ -109,19 +109,19 @@ def render_results(result: BacktestResult, data_warnings: list[str] | None = Non
         with col1:
             st.plotly_chart(
                 pnl_distribution(result.trades),
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
             )
         with col2:
             st.plotly_chart(
                 trade_scatter(result.trades),
-                use_container_width=True,
+                width="stretch",
                 config={"displayModeBar": False},
             )
 
         st.plotly_chart(
             monthly_returns_heatmap(result.trades),
-            use_container_width=True,
+            width="stretch",
             config={"displayModeBar": False},
         )
 
@@ -241,7 +241,7 @@ def _render_trade_table(result: BacktestResult):
 
     st.dataframe(
         trade_df,
-        use_container_width=True,
+        width="stretch",
         height=min(400, 35 * len(trade_df) + 38),
         hide_index=True,
     )

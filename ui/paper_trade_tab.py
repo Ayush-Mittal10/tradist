@@ -93,6 +93,7 @@ def _render_session_controls(client):
         "Select strategy",
         strategy_names,
         label_visibility="collapsed",
+        key="paper_strategy_selector",
     )
     strategy = get_strategy(selected)
     st.caption(strategy.description)
@@ -110,12 +111,14 @@ def _render_session_controls(client):
                     param.label,
                     value=int(param.default),
                     step=int(param.step) if param.step else 1,
+                    key=f"pt_param_{param.name}",
                 )
             elif param.type == "float":
                 params[param.name] = st.number_input(
                     param.label,
                     value=float(param.default),
                     step=float(param.step) if param.step else 1.0,
+                    key=f"pt_param_{param.name}",
                 )
 
     # Capital
@@ -129,9 +132,10 @@ def _render_session_controls(client):
         max_value=1_00_00_000,
         value=5_00_000,
         step=50_000,
+        key="pt_capital",
     )
 
-    lot_size = st.number_input("Lot Size", value=65, min_value=1)
+    lot_size = st.number_input("Lot Size", value=65, min_value=1, key="pt_lot_size")
 
     poll_interval = st.slider(
         "Poll interval (seconds)",
@@ -139,6 +143,7 @@ def _render_session_controls(client):
         max_value=300,
         value=30,
         help="How often to check for signals",
+        key="pt_poll_interval",
     )
 
     st.markdown("<br>", unsafe_allow_html=True)
@@ -149,20 +154,20 @@ def _render_session_controls(client):
     if session and session.is_running:
         col1, col2 = st.columns(2)
         with col1:
-            if st.button("⏹️ Stop Session", use_container_width=True, type="primary"):
+            if st.button("⏹️ Stop Session", width="stretch", type="primary"):
                 result = session.stop()
                 st.session_state["paper_results"] = result
                 del st.session_state["paper_session"]
                 st.rerun()
         with col2:
-            if st.button("🔄 Manual Tick", use_container_width=True):
+            if st.button("🔄 Manual Tick", width="stretch"):
                 tick_result = session.manual_tick()
                 st.toast(f"{tick_result['action']}: {tick_result['details']}")
                 st.rerun()
     else:
         if st.button(
             "▶️  START PAPER TRADING",
-            use_container_width=True,
+            width="stretch",
             type="primary",
         ):
             # Build components
@@ -246,7 +251,7 @@ def _render_live_dashboard(session: TradingSession):
                 })
             st.dataframe(
                 pd.DataFrame(pos_data),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 
@@ -260,7 +265,7 @@ def _render_live_dashboard(session: TradingSession):
             trade_data = [t.summary_dict() for t in completed_trades[-10:]]
             st.dataframe(
                 pd.DataFrame(trade_data),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 

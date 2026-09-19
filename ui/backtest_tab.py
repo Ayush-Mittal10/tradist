@@ -38,6 +38,7 @@ def render_backtest_config(df: pd.DataFrame | None) -> dict | None:
         strategy_names,
         index=0,
         label_visibility="collapsed",
+        key="backtest_strategy_selector",
     )
 
     strategy = get_strategy(selected_name)
@@ -137,6 +138,7 @@ def render_backtest_config(df: pd.DataFrame | None) -> dict | None:
         list(cost_presets.keys()),
         index=1,  # Default to Realistic
         label_visibility="collapsed",
+        key="backtest_cost_model",
     )
 
     cost_descriptions = {
@@ -149,7 +151,7 @@ def render_backtest_config(df: pd.DataFrame | None) -> dict | None:
     # ── RUN button ──────────────────────────────────────────────────
     st.markdown("<br>", unsafe_allow_html=True)
 
-    if st.button("🚀  RUN BACKTEST", use_container_width=True, type="primary"):
+    if st.button("🚀  RUN BACKTEST", width="stretch", type="primary"):
         if df is None or df.empty:
             st.error("Please upload data first")
             return None
@@ -177,6 +179,7 @@ def _render_parameter(param: StrategyParameter):
             value=int(param.default),
             step=int(param.step) if param.step else 1,
             help=param.help_text,
+            key=f"bt_param_{param.name}",
         )
     elif param.type == "float":
         return st.number_input(
@@ -186,6 +189,7 @@ def _render_parameter(param: StrategyParameter):
             value=float(param.default),
             step=float(param.step) if param.step else 1.0,
             help=param.help_text,
+            key=f"bt_param_{param.name}",
         )
     elif param.type == "select":
         options = param.options or []
@@ -194,12 +198,15 @@ def _render_parameter(param: StrategyParameter):
             options,
             index=options.index(param.default) if param.default in options else 0,
             help=param.help_text,
+            key=f"bt_param_{param.name}",
         )
     elif param.type == "bool":
         return st.checkbox(
             param.label,
             value=bool(param.default),
             help=param.help_text,
+            key=f"bt_param_{param.name}",
         )
     else:
-        return st.text_input(param.label, value=str(param.default), help=param.help_text)
+        return st.text_input(param.label, value=str(param.default), help=param.help_text, key=f"bt_param_{param.name}")
+

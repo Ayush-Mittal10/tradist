@@ -181,7 +181,7 @@ def _render_volatility_dashboard(df: pd.DataFrame, r: float):
         ))
         _apply_layout(fig, "Realized Volatility (20-Day)")
         fig.update_yaxes(title_text="Volatility (%)", ticksuffix="%")
-        st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+        st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
     st.markdown("---")
 
@@ -309,7 +309,7 @@ def _render_monte_carlo_analysis(
     _apply_layout(fig, f"Monte Carlo P&L Distribution ({mc.n_paths:,} paths, σ={sigma*100:.1f}%)")
     fig.update_xaxes(title_text="P&L (₹)", tickformat=",")
     fig.update_yaxes(title_text="Frequency")
-    st.plotly_chart(fig, use_container_width=True, config={"displayModeBar": False})
+    st.plotly_chart(fig, width="stretch", config={"displayModeBar": False})
 
     # Extra stats
     st.caption(
@@ -362,7 +362,7 @@ def _render_greeks_table(df: pd.DataFrame, result: BacktestResult, r: float):
 
     display_df.columns = [c.upper() for c in display_df.columns]
 
-    st.dataframe(display_df, use_container_width=True, hide_index=True, height=300)
+    st.dataframe(display_df, width="stretch", hide_index=True, height=300)
     st.markdown("---")
 
 
@@ -433,7 +433,7 @@ def _render_calibration(
                 })
             st.dataframe(
                 pd.DataFrame(table_data),
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
             )
 

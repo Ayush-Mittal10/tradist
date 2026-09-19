@@ -6,6 +6,7 @@ dist/
 build/
 .venv/
 venv/
+*.egg
 
 # Data
 data/*.parquet
@@ -18,9 +19,22 @@ data/*.csv
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Secrets
 .env
 
+# Agent / AI tool configs
+.agents/
+.claude/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
 # Paper trading sessions
 paper_sessions/
+
+# Streamlit secrets (config is fine to track)
+.streamlit/secrets.toml
