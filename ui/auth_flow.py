@@ -11,6 +11,7 @@ Handles the complete login flow:
 
 from __future__ import annotations
 
+import os
 import streamlit as st
 
 from core.data_engine.upstox_client import UpstoxClient, UpstoxAuthError
@@ -117,9 +118,11 @@ def _render_connect_form():
             )
 
     # Manual token input (for power users)
-    with st.expander("🔑 Or paste Access Token directly"):
+    env_token = os.environ.get("UPSTOX_ACCESS_TOKEN", "")
+    with st.expander("🔑 Or paste Access Token directly", expanded=bool(env_token)):
         manual_token = st.text_input(
             "Access Token",
+            value=env_token,
             type="password",
             help="If you already have a token from another tool",
         )
